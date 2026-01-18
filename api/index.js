@@ -1,9 +1,7 @@
-import { createApp } from '../server/_core/index.ts';
+import { createApp } from '../dist/index.js';
 
-// For Vercel, we can import from the source if we use the right loader,
-// but it's safer to use the compiled version if possible.
-// However, Vercel's @vercel/node can handle TS files directly in the api/ directory.
-// Let's just export the app directly.
-
-const app = createApp();
-export default app;
+/**
+ * Vercel Serverless Function entry point.
+ * We use the compiled dist/index.js if available for better performance and consistency.
+ */
+export default createApp();

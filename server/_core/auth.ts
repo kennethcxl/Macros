@@ -41,6 +41,11 @@ export async function authenticateRequest(req: Request): Promise<User> {
         throw new Error('No authentication token provided');
     }
 
+    if (!supabaseAdmin) {
+        console.error('[Auth] Supabase client not initialized - missing VITE_SUPABASE_URL');
+        throw new Error('Authentication system configuration error');
+    }
+
     // Verify the token with Supabase
     const { data: { user: supabaseUser }, error } = await supabaseAdmin.auth.getUser(accessToken);
 
