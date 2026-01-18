@@ -133,10 +133,10 @@ export const appRouter = router({
           mealType: z.enum(["breakfast", "lunch", "dinner", "snack", "other"]),
           name: z.string(),
           description: z.string().optional(),
-          calories: z.number().int().positive(),
-          protein: z.number().positive(),
-          carbs: z.number().positive(),
-          fat: z.number().positive(),
+          calories: z.number().int().min(0),
+          protein: z.number().min(0),
+          carbs: z.number().min(0),
+          fat: z.number().min(0),
           imageUrl: z.string().optional(),
           aiEstimated: z.boolean().default(false),
           mealDate: z.date().default(() => new Date()),
@@ -172,10 +172,10 @@ export const appRouter = router({
           mealType: z.enum(["breakfast", "lunch", "dinner", "snack", "other"]).optional(),
           name: z.string().optional(),
           description: z.string().optional(),
-          calories: z.number().int().positive().optional(),
-          protein: z.number().positive().optional(),
-          carbs: z.number().positive().optional(),
-          fat: z.number().positive().optional(),
+          calories: z.number().int().min(0).optional(),
+          protein: z.number().min(0).optional(),
+          carbs: z.number().min(0).optional(),
+          fat: z.number().min(0).optional(),
         })
       )
       .mutation(async ({ ctx, input }) => {
@@ -221,7 +221,7 @@ export const appRouter = router({
     analyzeFromImage: protectedProcedure
       .input(
         z.object({
-          imageUrl: z.string().url(),
+          imageUrl: z.string(),
           description: z.string().optional(),
         })
       )

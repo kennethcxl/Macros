@@ -42,6 +42,29 @@ const trpcClient = trpc.createClient({
     httpBatchLink({
       url: "/api/trpc",
       transformer: superjson,
+      async headers() {
+        // Get Supabase session from localStorage
+        const supabaseKey = Object.keys(localStorage).find(key =>
+          key.startsWith('sb-') && key.endsWith('-auth-token')
+        );
+
+        if (supabaseKey) {
+          try {
+            const authData = JSON.parse(localStorage.getItem(supabaseKey) || '{}');
+            const accessToken = authData.access_token;
+
+            if (accessToken) {
+              return {
+                Authorization: `Bearer ${accessToken}`,
+              };
+            }
+          } catch (error) {
+            console.error('Failed to get Supabase token:', error);
+          }
+        }
+
+        return {};
+      },
       fetch(input, init) {
         return globalThis.fetch(input, {
           ...(init ?? {}),
