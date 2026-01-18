@@ -15,8 +15,14 @@ export async function createContext(
 
   try {
     user = await authenticateRequest(opts.req);
+    if (user) {
+      console.log('[Context] Authenticated user:', user.id);
+    }
   } catch (error) {
-    // Authentication is optional for public procedures.
+    const err = error as Error;
+    if (err.message !== 'No authentication token provided') {
+      console.error('[Context] Auth error:', err.message);
+    }
     user = null;
   }
 

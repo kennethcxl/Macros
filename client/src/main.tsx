@@ -43,24 +43,15 @@ const trpcClient = trpc.createClient({
       url: "/api/trpc",
       transformer: superjson,
       async headers() {
-        // Get Supabase session from localStorage
-        const supabaseKey = Object.keys(localStorage).find(key =>
-          key.startsWith('sb-') && key.endsWith('-auth-token')
-        );
+        // Use the official Supabase client to get the session
+        // This is more reliable than manual localStorage parsing
+        const { supabase } = await import("./lib/supabase");
+        const { data: { session } } = await supabase.auth.getSession();
 
-        if (supabaseKey) {
-          try {
-            const authData = JSON.parse(localStorage.getItem(supabaseKey) || '{}');
-            const accessToken = authData.access_token;
-
-            if (accessToken) {
-              return {
-                Authorization: `Bearer ${accessToken}`,
-              };
-            }
-          } catch (error) {
-            console.error('Failed to get Supabase token:', error);
-          }
+        if (session?.access_token) {
+          return {
+            Authorization: `Bearer ${session.access_token}`,
+          };
         }
 
         return {};

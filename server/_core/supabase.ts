@@ -2,6 +2,11 @@ import { createClient } from '@supabase/supabase-js';
 import { ENV } from './env';
 
 // Server-side Supabase client
+if (ENV.supabaseUrl) {
+    const keyType = ENV.supabaseServiceKey ? 'Service' : 'Anon';
+    console.log(`[Supabase] Initializing admin client with ${keyType} key`);
+}
+
 export const supabaseAdmin = ENV.supabaseUrl
     ? createClient(
         ENV.supabaseUrl,
