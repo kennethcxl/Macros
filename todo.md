@@ -47,6 +47,10 @@
 - [x] Display remaining macros for the day
 - [x] Add visual indicators (on-track, over, under)
 - [x] Implement real-time updates
+- [x] Redesign dashboard to focus on daily summary + Add Meal button
+- [x] Improve macro breakdown chart colors and convert to single bars
+- [x] Create separate analytics page for detailed charts
+- [x] Move coaching tips below daily summary
 
 ## Phase 7: Daily Reset Mechanism
 - [ ] Implement daily reset logic (midnight user local time)

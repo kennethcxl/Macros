@@ -6,20 +6,11 @@ import { toast } from "sonner";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { Plus, TrendingUp, Apple, Flame } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-
-const MACRO_COLORS = {
-  protein: "rgb(168, 85, 247)",
-  carbs: "rgb(34, 197, 94)",
-  fat: "rgb(249, 115, 22)",
-  calories: "rgb(59, 130, 246)",
-};
+import { Plus, TrendingUp, Apple, Flame, BarChart3, Lightbulb } from "lucide-react";
 
 export default function Dashboard() {
   const [, navigate] = useLocation();
   const { user, isAuthenticated, loading } = useAuth();
-  const [selectedDate, setSelectedDate] = useState(new Date());
 
   const trackingQuery = trpc.tracking.getToday.useQuery();
   const mealsQuery = trpc.meals.getToday.useQuery();
@@ -60,17 +51,16 @@ export default function Dashboard() {
   const carbsPercent = Math.min((totalCarbs / Number(profile.targetCarbs)) * 100, 100);
   const fatPercent = Math.min((totalFat / Number(profile.targetFat)) * 100, 100);
 
-  const macroData = [
-    { name: "Protein", value: totalProtein, target: Number(profile.targetProtein), color: MACRO_COLORS.protein },
-    { name: "Carbs", value: totalCarbs, target: Number(profile.targetCarbs), color: MACRO_COLORS.carbs },
-    { name: "Fat", value: totalFat, target: Number(profile.targetFat), color: MACRO_COLORS.fat },
-  ];
+  const remainingCalories = Math.max(0, (profile.targetCalories || 2000) - totalCalories);
+  const remainingProtein = Math.max(0, Number(profile.targetProtein) - totalProtein);
+  const remainingCarbs = Math.max(0, Number(profile.targetCarbs) - totalCarbs);
+  const remainingFat = Math.max(0, Number(profile.targetFat) - totalFat);
 
-  const pieData = [
-    { name: "Protein", value: totalProtein * 4, color: MACRO_COLORS.protein },
-    { name: "Carbs", value: totalCarbs * 4, color: MACRO_COLORS.carbs },
-    { name: "Fat", value: totalFat * 9, color: MACRO_COLORS.fat },
-  ];
+  const getStatusColor = (percent: number) => {
+    if (percent <= 100) return "bg-green-500";
+    if (percent <= 110) return "bg-yellow-500";
+    return "bg-red-500";
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -87,162 +77,152 @@ export default function Dashboard() {
       </div>
 
       <div className="container py-8 space-y-8">
+        {/* Daily Summary Section */}
         <div>
-          <h2 className="text-2xl font-bold mb-4">Today's Progress</h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card className="macro-card">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Calories</p>
-                  <p className="text-3xl font-bold">{totalCalories}</p>
-                  <p className="text-xs text-muted-foreground">of {profile.targetCalories}</p>
+          <h2 className="text-2xl font-bold mb-6">Today's Summary</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Calories Card */}
+            <Card className="border border-border bg-card/50 backdrop-blur-sm shadow-lg p-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Calories</p>
+                    <p className="text-3xl font-bold">{totalCalories}</p>
+                  </div>
+                  <Flame className="h-8 w-8 text-blue-500" />
                 </div>
-                <Flame className="h-8 w-8 text-macro-calories" />
+                <div className="space-y-2">
+                  <Progress value={caloriePercent} className="h-2" />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>{caloriePercent.toFixed(0)}% of {profile.targetCalories}</span>
+                    <span>{remainingCalories} left</span>
+                  </div>
+                </div>
               </div>
-              <div className="macro-progress">
-                <div className="macro-progress-bar macro-progress-calories" style={{ width: `${caloriePercent}%` }}></div>
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">{Math.round(caloriePercent)}% complete</p>
             </Card>
 
-            <Card className="macro-card">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Protein</p>
-                  <p className="text-3xl font-bold">{Math.round(totalProtein)}g</p>
-                  <p className="text-xs text-muted-foreground">of {Math.round(Number(profile.targetProtein))}g</p>
+            {/* Protein Card */}
+            <Card className="border border-border bg-card/50 backdrop-blur-sm shadow-lg p-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Protein</p>
+                    <p className="text-3xl font-bold">{Math.round(totalProtein)}g</p>
+                  </div>
+                  <Apple className="h-8 w-8 text-red-500" />
                 </div>
-                <Apple className="h-8 w-8 text-macro-protein" />
+                <div className="space-y-2">
+                  <Progress value={proteinPercent} className="h-2" />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>{proteinPercent.toFixed(0)}% of {Math.round(Number(profile.targetProtein))}g</span>
+                    <span>{Math.round(remainingProtein)}g left</span>
+                  </div>
+                </div>
               </div>
-              <div className="macro-progress">
-                <div className="macro-progress-bar macro-progress-protein" style={{ width: `${proteinPercent}%` }}></div>
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">{Math.round(proteinPercent)}% complete</p>
             </Card>
 
-            <Card className="macro-card">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Carbs</p>
-                  <p className="text-3xl font-bold">{Math.round(totalCarbs)}g</p>
-                  <p className="text-xs text-muted-foreground">of {Math.round(Number(profile.targetCarbs))}g</p>
+            {/* Carbs Card */}
+            <Card className="border border-border bg-card/50 backdrop-blur-sm shadow-lg p-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Carbs</p>
+                    <p className="text-3xl font-bold">{Math.round(totalCarbs)}g</p>
+                  </div>
+                  <TrendingUp className="h-8 w-8 text-green-500" />
                 </div>
-                <TrendingUp className="h-8 w-8 text-macro-carbs" />
+                <div className="space-y-2">
+                  <Progress value={carbsPercent} className="h-2" />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>{carbsPercent.toFixed(0)}% of {Math.round(Number(profile.targetCarbs))}g</span>
+                    <span>{Math.round(remainingCarbs)}g left</span>
+                  </div>
+                </div>
               </div>
-              <div className="macro-progress">
-                <div className="macro-progress-bar macro-progress-carbs" style={{ width: `${carbsPercent}%` }}></div>
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">{Math.round(carbsPercent)}% complete</p>
             </Card>
 
-            <Card className="macro-card">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Fat</p>
-                  <p className="text-3xl font-bold">{Math.round(totalFat)}g</p>
-                  <p className="text-xs text-muted-foreground">of {Math.round(Number(profile.targetFat))}g</p>
+            {/* Fat Card */}
+            <Card className="border border-border bg-card/50 backdrop-blur-sm shadow-lg p-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Fat</p>
+                    <p className="text-3xl font-bold">{Math.round(totalFat)}g</p>
+                  </div>
+                  <div className="h-8 w-8 rounded-full bg-amber-500"></div>
                 </div>
-                <div className="h-8 w-8 rounded-full" style={{ backgroundColor: MACRO_COLORS.fat }}></div>
+                <div className="space-y-2">
+                  <Progress value={fatPercent} className="h-2" />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>{fatPercent.toFixed(0)}% of {Math.round(Number(profile.targetFat))}g</span>
+                    <span>{Math.round(remainingFat)}g left</span>
+                  </div>
+                </div>
               </div>
-              <div className="macro-progress">
-                <div className="macro-progress-bar macro-progress-fat" style={{ width: `${fatPercent}%` }}></div>
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">{Math.round(fatPercent)}% complete</p>
             </Card>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Macro Breakdown</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={macroData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis dataKey="name" stroke="var(--muted-foreground)" />
-                <YAxis stroke="var(--muted-foreground)" />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "var(--card)",
-                    border: "1px solid var(--border)",
-                    borderRadius: "0.5rem",
-                  }}
-                />
-                <Bar dataKey="value" fill="var(--accent)" name="Current" />
-                <Bar dataKey="target" fill="var(--muted)" name="Target" />
-              </BarChart>
-            </ResponsiveContainer>
-          </Card>
+        {/* Primary Action: Add Meal Button */}
+        <div className="flex flex-col gap-4">
+          <Button
+            onClick={() => navigate("/meal-logging")}
+            className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold py-6 text-lg rounded-lg shadow-lg"
+          >
+            <Plus className="mr-2 h-6 w-6" />
+            Add Meal
+          </Button>
 
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Calorie Distribution</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </Card>
-        </div>
-
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold">Today's Meals</h2>
-            <Button onClick={() => navigate("/meals/new")} className="bg-accent hover:bg-accent/90 text-accent-foreground">
-              <Plus className="mr-2 h-4 w-4" />
-              Add Meal
-            </Button>
-          </div>
-
-          {meals.length === 0 ? (
-            <Card className="p-8 text-center">
-              <p className="text-muted-foreground mb-4">No meals logged yet</p>
-              <Button onClick={() => navigate("/meals/new")} className="bg-accent hover:bg-accent/90 text-accent-foreground">
-                Log Your First Meal
-              </Button>
+          {/* Today's Meals */}
+          {meals && meals.length > 0 && (
+            <Card className="border border-border bg-card/50 backdrop-blur-sm shadow-lg p-6">
+              <h3 className="text-lg font-bold mb-4">Today's Meals ({meals.length})</h3>
+              <div className="space-y-3">
+                {meals.map((meal) => (
+                  <div key={meal.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border">
+                    <div className="flex-1">
+                      <p className="font-semibold">{meal.name}</p>
+                      <p className="text-sm text-muted-foreground">{meal.mealType}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold">{meal.calories} cal</p>
+                      <p className="text-xs text-muted-foreground">{Math.round(Number(meal.protein))}P • {Math.round(Number(meal.carbs))}C • {Math.round(Number(meal.fat))}F</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </Card>
-          ) : (
-            <div className="space-y-3">
-              {meals.map((meal) => (
-                <Card key={meal.id} className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
-                  <div className="flex-1">
-                    <p className="font-semibold">{meal.name}</p>
-                    <p className="text-sm text-muted-foreground capitalize">{meal.mealType}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold">{meal.calories} cal</p>
-                    <p className="text-xs text-muted-foreground">P: {Math.round(Number(meal.protein))}g | C: {Math.round(Number(meal.carbs))}g | F: {Math.round(Number(meal.fat))}g</p>
-                  </div>
-                </Card>
-              ))}
-            </div>
           )}
         </div>
 
-        {coachingQuery.data && coachingQuery.data.length > 0 && (
+        {/* AI Coaching Tips Section */}
+        {coachingQuery.data && Array.isArray(coachingQuery.data) && coachingQuery.data.length > 0 && (
           <div>
-            <h2 className="text-2xl font-bold mb-4">AI Coach Tips</h2>
-            <div className="space-y-3">
-              {coachingQuery.data.map((tip, index) => (
-                <Card key={index} className="p-4 bg-accent/5 border-accent/20">
-                  <p className="text-sm">{tip.tip || tip.category}</p>
+            <div className="flex items-center gap-2 mb-4">
+              <Lightbulb className="h-6 w-6 text-yellow-500" />
+              <h2 className="text-2xl font-bold">AI Coaching Tips</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {(coachingQuery.data as any[]).map((item: any, idx: number) => (
+                <Card key={idx} className="border border-border bg-card/50 backdrop-blur-sm shadow-lg p-6">
+                  <p className="text-sm leading-relaxed">{item.tip}</p>
                 </Card>
               ))}
             </div>
           </div>
         )}
+
+        {/* Analytics Link */}
+        <div className="flex justify-center">
+          <Button
+            variant="outline"
+            onClick={() => navigate("/analytics")}
+            className="gap-2"
+          >
+            <BarChart3 className="h-4 w-4" />
+            View Detailed Analytics
+          </Button>
+        </div>
       </div>
     </div>
   );

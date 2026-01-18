@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
 import MealLogging from "./pages/MealLogging";
+import Analytics from "./pages/Analytics";
 
 function Router() {
   return (
@@ -18,6 +19,8 @@ function Router() {
       <Route path="/onboarding" component={Onboarding} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/meals/new" component={MealLogging} />
+      <Route path="/meal-logging" component={MealLogging} />
+      <Route path="/analytics" component={Analytics} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
