@@ -45,8 +45,11 @@ export async function authenticateRequest(req: Request): Promise<User> {
     const { data: { user: supabaseUser }, error } = await supabaseAdmin.auth.getUser(accessToken);
 
     if (error || !supabaseUser) {
+        console.error('[Auth] Supabase token verification failed:', error?.message);
         throw new Error('Invalid or expired authentication token');
     }
+
+    console.log('[Auth] Authenticated Supabase user:', supabaseUser.email);
 
     // Get or create user in our database
     let user = await db.getUserByOpenId(supabaseUser.id);

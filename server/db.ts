@@ -9,14 +9,15 @@ let _pool: Pool | null = null;
 
 // Lazily create the drizzle instance so local tooling can run without a DB.
 export async function getDb() {
-  if (!_db && process.env.DATABASE_URL) {
+  if (!_db && ENV.databaseUrl) {
     try {
       _pool = new Pool({
-        connectionString: process.env.DATABASE_URL,
+        connectionString: ENV.databaseUrl,
+        ssl: ENV.isProduction || !!process.env.VERCEL ? { rejectUnauthorized: false } : false,
       });
       _db = drizzle(_pool);
     } catch (error) {
-      console.warn("[Database] Failed to connect:", error);
+      console.error("[Database] Failed to connect:", error);
       _db = null;
     }
   }
