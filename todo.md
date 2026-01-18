@@ -31,12 +31,13 @@
 - [x] Add success feedback
 
 ## Phase 5: AI-Powered Meal Analysis
-- [ ] Create image upload UI component
-- [ ] Implement image upload to Supabase Storage
-- [ ] Create OpenRouter API integration for meal analysis
-- [ ] Build serverless function for secure AI calls
-- [ ] Implement meal estimation confirmation flow
-- [ ] Add ability to edit AI-estimated macros before saving
+- [x] Redesign meal logging UI to be AI-first (remove manual macro entry)
+- [x] Create image upload and text description UI
+- [x] Implement OpenRouter LLM integration for macro estimation
+- [x] Build serverless function for secure AI calls
+- [x] Create meal confirmation flow with AI-estimated macros
+- [x] Add ability to adjust AI-estimated macros before saving
+- [x] Implement portion size detection and estimation
 
 ## Phase 6: Real-Time Dashboard
 - [x] Create main dashboard layout

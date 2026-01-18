@@ -217,6 +217,52 @@ export const appRouter = router({
       }),
   }),
 
+  mealAnalysis: router({
+    analyzeFromImage: protectedProcedure
+      .input(
+        z.object({
+          imageUrl: z.string().url(),
+          description: z.string().optional(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const { analyzeMealFromImage } = await import("./mealAnalysis");
+        const analysis = await analyzeMealFromImage(input.imageUrl, input.description);
+        return analysis;
+      }),
+
+    analyzeFromDescription: protectedProcedure
+      .input(z.object({ description: z.string() }))
+      .mutation(async ({ ctx, input }) => {
+        const { analyzeMealFromDescription } = await import("./mealAnalysis");
+        const analysis = await analyzeMealFromDescription(input.description);
+        return analysis;
+      }),
+
+    refineEstimate: protectedProcedure
+      .input(
+        z.object({
+          originalAnalysis: z.object({
+            mealName: z.string(),
+            description: z.string(),
+            calories: z.number(),
+            protein: z.number(),
+            carbs: z.number(),
+            fat: z.number(),
+            confidence: z.enum(["high", "medium", "low"]),
+            ingredients: z.array(z.string()),
+            notes: z.string(),
+          }),
+          userFeedback: z.string(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const { refineMealEstimate } = await import("./mealAnalysis");
+        const refined = await refineMealEstimate(input.originalAnalysis, input.userFeedback);
+        return refined;
+      }),
+  }),
+
   coaching: router({
     getToday: protectedProcedure.query(async ({ ctx }) => {
       const today = new Date();
