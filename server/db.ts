@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, userProfiles, meals, dailyTracking, coachingLogs, InsertUserProfile, InsertMeal, InsertDailyTracking } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +89,126 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+/**
+ * Get or create user profile
+ */
+export async function getUserProfile(userId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(userProfiles).where(eq(userProfiles.userId, userId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createUserProfile(userId: number, data: InsertUserProfile) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const profile = { ...data, userId };
+  await db.insert(userProfiles).values(profile);
+  return profile;
+}
+
+export async function updateUserProfile(userId: number, data: Partial<InsertUserProfile>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.update(userProfiles).set(data).where(eq(userProfiles.userId, userId));
+}
+
+/**
+ * Meal operations
+ */
+export async function getMealsByDate(userId: number, mealDate: Date) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const dateStr = mealDate.toISOString().split('T')[0];
+  const result = await db.select().from(meals).where(
+    and(eq(meals.userId, userId), eq(meals.mealDate, dateStr as any))
+  );
+  return result;
+}
+
+export async function createMeal(mealData: InsertMeal) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.insert(meals).values(mealData);
+  return result;
+}
+
+export async function updateMeal(mealId: number, data: Partial<InsertMeal>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.update(meals).set(data).where(eq(meals.id, mealId));
+}
+
+export async function deleteMeal(mealId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.delete(meals).where(eq(meals.id, mealId));
+}
+
+/**
+ * Daily tracking operations
+ */
+export async function getDailyTracking(userId: number, trackingDate: Date) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const dateStr = trackingDate.toISOString().split('T')[0];
+  const result = await db.select().from(dailyTracking).where(
+    and(eq(dailyTracking.userId, userId), eq(dailyTracking.trackingDate, dateStr as any))
+  ).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function upsertDailyTracking(userId: number, trackingDate: Date, data: Partial<InsertDailyTracking>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const dateStr = trackingDate.toISOString().split('T')[0];
+  const existing = await getDailyTracking(userId, trackingDate);
+
+  if (existing) {
+    await db.update(dailyTracking).set(data).where(
+      and(eq(dailyTracking.userId, userId), eq(dailyTracking.trackingDate, dateStr as any))
+    );
+  } else {
+    await db.insert(dailyTracking).values({
+      userId,
+      trackingDate: dateStr as any,
+      ...data,
+    });
+  }
+}
+
+/**
+ * Coaching logs
+ */
+export async function addCoachingLog(userId: number, coachingDate: Date, tip: string, category: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const dateStr = coachingDate.toISOString().split('T')[0];
+  await db.insert(coachingLogs).values({
+    userId,
+    coachingDate: dateStr as any,
+    tip,
+    category: category as any,
+  });
+}
+
+export async function getCoachingLogs(userId: number, coachingDate: Date) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const dateStr = coachingDate.toISOString().split('T')[0];
+  const result = await db.select().from(coachingLogs).where(
+    and(eq(coachingLogs.userId, userId), eq(coachingLogs.coachingDate, dateStr as any))
+  );
+  return result;
+}

@@ -63,8 +63,8 @@
   --secondary-foreground: oklch(0.4 0.015 65);
   --muted: oklch(0.967 0.001 286.375);
   --muted-foreground: oklch(0.552 0.016 285.938);
-  --accent: oklch(0.967 0.001 286.375);
-  --accent-foreground: oklch(0.141 0.005 285.823);
+  --accent: oklch(0.623 0.214 259.815);
+  --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.92 0.004 286.32);
@@ -76,6 +76,11 @@
   --sidebar-accent-foreground: oklch(0.141 0.005 285.823);
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.623 0.214 259.815);
+  /* Macro-specific colors */
+  --macro-protein: 168 85 247;
+  --macro-carbs: 34 197 94;
+  --macro-fat: 249 115 22;
+  --macro-calories: 59 130 246;
 }
 
 .dark {
@@ -173,5 +178,46 @@
       padding-right: 2rem;
       max-width: 1280px; /* Standard content width */
     }
+  }
+
+  /* Elegant macro tracking components */
+  .macro-card {
+    @apply rounded-xl border border-border bg-card p-6 text-card-foreground shadow-sm hover:shadow-md transition-shadow;
+  }
+
+  .macro-progress {
+    @apply h-2 rounded-full bg-muted overflow-hidden;
+  }
+
+  .macro-progress-bar {
+    @apply h-full rounded-full transition-all duration-300;
+  }
+
+  .macro-progress-protein {
+    background-color: rgb(168 85 247);
+  }
+
+  .macro-progress-carbs {
+    background-color: rgb(34 197 94);
+  }
+
+  .macro-progress-fat {
+    background-color: rgb(249 115 22);
+  }
+
+  .macro-progress-calories {
+    background-color: rgb(59 130 246);
+  }
+
+  .input-elegant {
+    @apply w-full px-4 py-3 rounded-lg border border-border bg-input text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all duration-200;
+  }
+
+  .label-elegant {
+    @apply text-sm font-semibold text-foreground mb-2 block;
+  }
+
+  .badge-status {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold;
   }
 }
