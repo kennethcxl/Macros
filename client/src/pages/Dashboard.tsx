@@ -74,7 +74,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}\n      <div className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+      <div className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container py-4 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">MacroTrack</h1>
@@ -87,10 +87,10 @@ export default function Dashboard() {
       </div>
 
       <div className="container py-8 space-y-8">
-        {/* Main Macro Cards */}\n        <div>
+        <div>
           <h2 className="text-2xl font-bold mb-4">Today's Progress</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Calories Card */}\n            <Card className="macro-card">
+            <Card className="macro-card">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Calories</p>
@@ -105,7 +105,7 @@ export default function Dashboard() {
               <p className="text-xs text-muted-foreground mt-2">{Math.round(caloriePercent)}% complete</p>
             </Card>
 
-            {/* Protein Card */}\n            <Card className="macro-card">
+            <Card className="macro-card">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Protein</p>
@@ -120,7 +120,7 @@ export default function Dashboard() {
               <p className="text-xs text-muted-foreground mt-2">{Math.round(proteinPercent)}% complete</p>
             </Card>
 
-            {/* Carbs Card */}\n            <Card className="macro-card">
+            <Card className="macro-card">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Carbs</p>
@@ -135,7 +135,7 @@ export default function Dashboard() {
               <p className="text-xs text-muted-foreground mt-2">{Math.round(carbsPercent)}% complete</p>
             </Card>
 
-            {/* Fat Card */}\n            <Card className="macro-card">
+            <Card className="macro-card">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Fat</p>
@@ -152,8 +152,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Charts Section */}\n        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Macro Breakdown Chart */}\n          <Card className="p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card className="p-6">
             <h3 className="text-lg font-semibold mb-4">Macro Breakdown</h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={macroData}>
@@ -173,7 +173,7 @@ export default function Dashboard() {
             </ResponsiveContainer>
           </Card>
 
-          {/* Calorie Distribution */}\n          <Card className="p-6">
+          <Card className="p-6">
             <h3 className="text-lg font-semibold mb-4">Calorie Distribution</h3>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
@@ -197,7 +197,7 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Meals Section */}\n        <div>
+        <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold">Today's Meals</h2>
             <Button onClick={() => navigate("/meals/new")} className="bg-accent hover:bg-accent/90 text-accent-foreground">
@@ -231,7 +231,7 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Coaching Tips */}\n        {coachingQuery.data && coachingQuery.data.length > 0 && (
+        {coachingQuery.data && coachingQuery.data.length > 0 && (
           <div>
             <h2 className="text-2xl font-bold mb-4">AI Coach Tips</h2>
             <div className="space-y-3">
