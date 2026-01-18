@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { Upload, Loader2, Check, AlertCircle } from "lucide-react";
+import { Upload, Loader2, AlertCircle } from "lucide-react";
 
 interface MealAnalysis {
   mealName: string;
@@ -41,6 +41,15 @@ export default function MealLogging() {
   // Refinement state
   const [refinementFeedback, setRefinementFeedback] = useState("");
   const [isRefining, setIsRefining] = useState(false);
+
+  // Manual entry state
+  const [useManualEntry, setUseManualEntry] = useState(false);
+  const [manualMacros, setManualMacros] = useState({
+    calories: "",
+    protein: "",
+    carbs: "",
+    fat: "",
+  });
 
   const createMealMutation = trpc.meals.create.useMutation();
   const analyzeImageMutation = trpc.mealAnalysis.analyzeFromImage.useMutation();
@@ -131,17 +140,31 @@ export default function MealLogging() {
       return;
     }
 
+    const finalMacros = useManualEntry
+      ? {
+          calories: parseInt(manualMacros.calories) || Math.round(mealAnalysis.calories),
+          protein: parseFloat(manualMacros.protein) || mealAnalysis.protein,
+          carbs: parseFloat(manualMacros.carbs) || mealAnalysis.carbs,
+          fat: parseFloat(manualMacros.fat) || mealAnalysis.fat,
+        }
+      : {
+          calories: Math.round(mealAnalysis.calories),
+          protein: mealAnalysis.protein,
+          carbs: mealAnalysis.carbs,
+          fat: mealAnalysis.fat,
+        };
+
     setIsLoading(true);
     try {
       await createMealMutation.mutateAsync({
         mealType,
         name: mealAnalysis.mealName,
         description: mealAnalysis.description,
-        calories: Math.round(mealAnalysis.calories),
-        protein: mealAnalysis.protein,
-        carbs: mealAnalysis.carbs,
-        fat: mealAnalysis.fat,
-        aiEstimated: true,
+        calories: finalMacros.calories,
+        protein: finalMacros.protein,
+        carbs: finalMacros.carbs,
+        fat: finalMacros.fat,
+        aiEstimated: !useManualEntry,
       });
       toast.success("Meal logged successfully!");
       navigate("/dashboard");
@@ -289,19 +312,19 @@ export default function MealLogging() {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="p-4 rounded-lg bg-muted/50 border border-border">
                       <p className="text-sm text-muted-foreground">Calories</p>
-                      <p className="text-3xl font-bold">{Math.round(mealAnalysis.calories)}</p>
+                      <p className="text-3xl font-bold">{useManualEntry && manualMacros.calories ? manualMacros.calories : Math.round(mealAnalysis.calories)}</p>
                     </div>
                     <div className="p-4 rounded-lg bg-muted/50 border border-border">
                       <p className="text-sm text-muted-foreground">Protein</p>
-                      <p className="text-3xl font-bold">{Math.round(mealAnalysis.protein)}g</p>
+                      <p className="text-3xl font-bold">{useManualEntry && manualMacros.protein ? manualMacros.protein : Math.round(mealAnalysis.protein)}g</p>
                     </div>
                     <div className="p-4 rounded-lg bg-muted/50 border border-border">
                       <p className="text-sm text-muted-foreground">Carbs</p>
-                      <p className="text-3xl font-bold">{Math.round(mealAnalysis.carbs)}g</p>
+                      <p className="text-3xl font-bold">{useManualEntry && manualMacros.carbs ? manualMacros.carbs : Math.round(mealAnalysis.carbs)}g</p>
                     </div>
                     <div className="p-4 rounded-lg bg-muted/50 border border-border">
                       <p className="text-sm text-muted-foreground">Fat</p>
-                      <p className="text-3xl font-bold">{Math.round(mealAnalysis.fat)}g</p>
+                      <p className="text-3xl font-bold">{useManualEntry && manualMacros.fat ? manualMacros.fat : Math.round(mealAnalysis.fat)}g</p>
                     </div>
                   </div>
 
@@ -359,6 +382,75 @@ export default function MealLogging() {
                       {isRefining && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                       {isRefining ? "Refining..." : "Refine Estimates"}
                     </Button>
+                  </div>
+
+                  <div className="border-t border-border pt-4">
+                    <button
+                      onClick={() => setUseManualEntry(!useManualEntry)}
+                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {useManualEntry ? "✓ Using manual values" : "+ Enter exact values manually"}
+                    </button>
+
+                    {useManualEntry && (
+                      <div className="mt-4 space-y-3 p-4 rounded-lg bg-muted/30 border border-border">
+                        <p className="text-xs text-muted-foreground">Override AI estimates with your exact values (optional)</p>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1">
+                            <Label htmlFor="manual-calories" className="text-xs label-elegant">
+                              Calories
+                            </Label>
+                            <Input
+                              id="manual-calories"
+                              type="number"
+                              placeholder={Math.round(mealAnalysis.calories).toString()}
+                              value={manualMacros.calories}
+                              onChange={(e) => setManualMacros({ ...manualMacros, calories: e.target.value })}
+                              className="input-elegant text-sm"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <Label htmlFor="manual-protein" className="text-xs label-elegant">
+                              Protein (g)
+                            </Label>
+                            <Input
+                              id="manual-protein"
+                              type="number"
+                              placeholder={Math.round(mealAnalysis.protein).toString()}
+                              value={manualMacros.protein}
+                              onChange={(e) => setManualMacros({ ...manualMacros, protein: e.target.value })}
+                              className="input-elegant text-sm"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <Label htmlFor="manual-carbs" className="text-xs label-elegant">
+                              Carbs (g)
+                            </Label>
+                            <Input
+                              id="manual-carbs"
+                              type="number"
+                              placeholder={Math.round(mealAnalysis.carbs).toString()}
+                              value={manualMacros.carbs}
+                              onChange={(e) => setManualMacros({ ...manualMacros, carbs: e.target.value })}
+                              className="input-elegant text-sm"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <Label htmlFor="manual-fat" className="text-xs label-elegant">
+                              Fat (g)
+                            </Label>
+                            <Input
+                              id="manual-fat"
+                              type="number"
+                              placeholder={Math.round(mealAnalysis.fat).toString()}
+                              value={manualMacros.fat}
+                              onChange={(e) => setManualMacros({ ...manualMacros, fat: e.target.value })}
+                              className="input-elegant text-sm"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-2">

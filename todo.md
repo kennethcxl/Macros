@@ -29,6 +29,7 @@
 - [x] Add meal category/type selector
 - [x] Implement meal save to database
 - [x] Add success feedback
+- [x] Add subtle manual entry toggle to AI meal logging page
 
 ## Phase 5: AI-Powered Meal Analysis
 - [x] Redesign meal logging UI to be AI-first (remove manual macro entry)
