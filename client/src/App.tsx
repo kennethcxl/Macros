@@ -10,6 +10,7 @@ import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
 import MealLogging from "./pages/MealLogging";
 import Analytics from "./pages/Analytics";
+import Settings from "./pages/Settings";
 
 function Router() {
   return (
@@ -21,6 +22,8 @@ function Router() {
       <Route path="/meals/new" component={MealLogging} />
       <Route path="/meal-logging" component={MealLogging} />
       <Route path="/analytics" component={Analytics} />
+      <Route path="/settings" component={Settings} />
+      <Route path="/profile" component={Settings} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { Upload, Loader2, AlertCircle } from "lucide-react";
+import { Upload, Loader2, AlertCircle, Settings } from "lucide-react";
+import { useState, useEffect } from "react";
 
 interface MealAnalysis {
   mealName: string;
@@ -29,6 +29,13 @@ export default function MealLogging() {
   const [isLoading, setIsLoading] = useState(false);
   const [mealAnalysis, setMealAnalysis] = useState<MealAnalysis | null>(null);
   const [mealType, setMealType] = useState("lunch" as "breakfast" | "lunch" | "dinner" | "snack" | "other");
+  const [hasApiKey, setHasApiKey] = useState(false);
+
+  useEffect(() => {
+    // Check if user has OpenRouter API key configured
+    const apiKey = localStorage.getItem("openrouter_api_key");
+    setHasApiKey(!!apiKey);
+  }, []);
 
   // Image analysis state
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -188,6 +195,26 @@ export default function MealLogging() {
       </div>
 
       <div className="container py-8">
+        {!hasApiKey && (
+          <div className="mb-6 p-4 rounded-lg bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-yellow-900 dark:text-yellow-100 mb-2">
+                AI meal analysis requires an OpenRouter API key
+              </p>
+              <p className="text-sm text-yellow-800 dark:text-yellow-200 mb-3">
+                Add your OpenRouter API key in Settings to enable AI-powered meal analysis from images.
+              </p>
+              <button
+                onClick={() => navigate("/settings")}
+                className="inline-flex items-center gap-2 px-3 py-1 rounded bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium transition-colors"
+              >
+                <Settings className="h-4 w-4" />
+                Go to Settings
+              </button>
+            </div>
+          </div>
+        )}
         <div className="max-w-3xl mx-auto">
           {!mealAnalysis ? (
             <Card className="border border-border bg-card/50 backdrop-blur-sm shadow-lg">
